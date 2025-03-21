@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 003e36cf29308314d800b2ffd94b76f5, type: 3}
+  m_Name: Rotary Gun
+  m_EditorClassIdentifier: 
+  type: 1
+  Name: Rotary Gun
+  gunPrefab: {fileID: 5237098221355406354, guid: 9ca839ad73210414384ca68e6a4d3566, type: 3}
+  spawn: {x: 0, y: 0, z: 0}
+  spawnRotation: {x: 0, y: 90, z: 0}
+  config: {fileID: 11400000, guid: ff12022310806a046a1788be5eb0d8a5, type: 2}
+  gunTrailShoot: {fileID: 11400000, guid: f9074ce1cbec3da4fb63a67c2d0a2071, type: 2}
