@@ -14,9 +14,7 @@ public class gunSelect : MonoBehaviour
     [SerializeField]
     private Transform gunParentR;
     [SerializeField]
-    private gunMian gunsL;
-    [SerializeField]
-    private gunMian gunsR;
+    private List<gunMian> guns;
 
     [Space]
     [Header("runtime filled")]
@@ -27,23 +25,32 @@ public class gunSelect : MonoBehaviour
     {
         Debug.Log("Start method called in gunSelect");
 
-        if (gunsL == null)
+        if (guns == null || guns.Count == 0)
         {
-            Debug.LogError("gunsL list is empty or null");
-            return;
-        }
-        if (gunsR == null)
-        {
-            Debug.LogError("gunsL list is empty or null");
+            Debug.LogError("guns list is empty or null");
             return;
         }
 
+        gunActiveL = guns.Find(g => g.type == gunTypeL);
+        if (gunActiveL != null)
+        {
+            gunActiveL.Spawn(gunParentL, this);
+            Debug.Log("Gun found: " + gunActiveL.Name);
+        }
+        else
+        {
+            Debug.LogError("No gun found for gunTypeL");
+        }
 
-        Debug.Log("Gun found: " + gunsL.Name);
-        gunActiveL = gunsL;
-        gunsL.Spawn(gunParentL, this);
-        Debug.Log("Gun found: " + gunsR.Name);
-        gunActiveR = gunsR;
-        gunsR.Spawn(gunParentR, this);
+        gunActiveR = guns.Find(g => g.type == gunTypeR);
+        if (gunActiveR != null)
+        {
+            gunActiveR.Spawn(gunParentR, this);
+            Debug.Log("Gun found: " + gunActiveR.Name);
+        }
+        else
+        {
+            Debug.LogError("No gun found for gunTypeR");
+        }
     }
 }

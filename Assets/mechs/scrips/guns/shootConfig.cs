@@ -6,4 +6,5 @@ public class shootConfig : ScriptableObject
 {
     public LayerMask hitMask;
     public float fireRate = 1.0f;
+    public float bulletSpeed = 10f;
 }

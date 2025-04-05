@@ -15,11 +15,14 @@ public class gunMian : ScriptableObject
 
     public shootConfig config;
     public gunTrailShoot gunTrailShoot;
+    public GameObject bullet;
 
+    public DamageConfig DamageConfig;
     private MonoBehaviour activeMonoBehaviour;
     private GameObject gunObject;
     private float lastShootTime;
     private ParticleSystem gunParticleSystem;
+
     private ObjectPool<TrailRenderer> renderersTrails;
 
     public List<gunMian> Type { get; internal set; }
@@ -54,65 +57,123 @@ public class gunMian : ScriptableObject
         }
     }
 
-    public void DoShoot()
+    public void DoShoot(bool isLeftGun)
     {
         if (Time.time > config.fireRate + lastShootTime)
         {
             lastShootTime += Time.time;
-            gunParticleSystem.Play();
-            Vector3 shootDir = gunParticleSystem.transform.forward;
+            Transform gunEndTransform = gunObject.transform.Find("gun_shoot");
+            if (gunEndTransform == null)
+            {
+                Debug.LogError("Gun end transform not found!");
+                return;
+            }
+
+            Vector3 shootDir = gunEndTransform.forward;
             shootDir.Normalize();
 
-            if (Physics.Raycast(
-                gunParticleSystem.transform.position,
-                shootDir,
-                out RaycastHit hit,
-                float.MaxValue,
-                config.hitMask
-                ))
+            GameObject newBullet = Instantiate(bullet);
+            newBullet.transform.position = gunEndTransform.position;
+            newBullet.transform.rotation = gunEndTransform.rotation;
+            newBullet.transform.localScale = new Vector3(0.1f, 0.1f, 0.5f);
+            Rigidbody rb = newBullet.AddComponent<Rigidbody>();
+            rb.useGravity = false;
+            rb.linearVelocity = shootDir * config.bulletSpeed;
+
+            activeMonoBehaviour.StartCoroutine(DestroyBulletAfterTime(newBullet, 2.0f));
+
+            if (isLeftGun)
             {
-                activeMonoBehaviour.StartCoroutine(
-                    PlayTrail(
-                        gunParticleSystem.transform.position,
-                        hit.point,
-                        hit
-                        ));
+                ShootFromGun(gunObject.transform.Find("LeftGun"));
             }
             else
             {
-                PlayTrail(
-                gunParticleSystem.transform.position,
-                gunParticleSystem.transform.position + (shootDir * gunTrailShoot.missDis),
-                new RaycastHit()
-                    );
+                ShootFromGun(gunObject.transform.Find("RightGun"));
             }
         }
     }
 
-    private IEnumerator PlayTrail(Vector3 startPoint, Vector3 endPoint, RaycastHit hit)
+    private IEnumerator DestroyBulletAfterTime(GameObject bullet, float delay)
     {
-        TrailRenderer inst = renderersTrails.Get();
-        inst.gameObject.SetActive(true);
-        inst.transform.position = startPoint;
-        yield return null;
-        inst.emitting = true;
-        float dist = Vector3.Distance(endPoint, startPoint);
-        float remainingDis = dist;
-        while (remainingDis > 0)
+        yield return new WaitForSeconds(delay);
+        Destroy(bullet);
+    }
+
+/*    public void Update()
+    {
+        if (Input.GetMouseButtonDown(0))
         {
-            inst.transform.position = Vector3.Lerp(
-                startPoint, endPoint, Mathf.Clamp01(1 - (remainingDis / dist))
-                );
-            remainingDis -= gunTrailShoot.simSpeed * Time.deltaTime;
-            yield return null;
+            ShootFromGun(gunObject.transform.Find("LeftGun"));
         }
-        inst.transform.position = endPoint;
+        if (Input.GetMouseButtonDown(1))
+        {
+            ShootFromGun(gunObject.transform.Find("RightGun"));
+        }
+    }*/
+
+    private void ShootFromGun(Transform gunTransform)
+    {
+        ParticleSystem gunParticleSystem = gunTransform.GetComponentInChildren<ParticleSystem>();
+        if (gunParticleSystem == null)
+        {
+            Debug.LogError("No ParticleSystem found in gunTransform!");
+            return;
+        }
+
+        gunParticleSystem.Play();
+        Vector3 shootDir = gunParticleSystem.transform.forward;
+        shootDir.Normalize();
+
+        if (Physics.Raycast(
+            gunParticleSystem.transform.position,
+            shootDir,
+            out RaycastHit hit,
+            float.MaxValue,
+            config.hitMask
+            ))
+        {
+            activeMonoBehaviour.StartCoroutine(
+                SpawnMesh(
+                    gunParticleSystem.transform.position,
+                    hit.point,
+                    hit
+                    ));
+            if (hit.collider != null)
+            {
+                if (hit.collider.TryGetComponent(out getDamage damageable))
+                {
+                    damageable.TakeDamage(DamageConfig.GetDamage());
+                }
+            }
+        }
+        else
+        {
+            SpawnMesh(
+            gunParticleSystem.transform.position,
+            gunParticleSystem.transform.position + (shootDir * gunTrailShoot.missDis),
+            new RaycastHit()
+                );
+        }
+    }
+
+    private IEnumerator SpawnMesh(Vector3 startPoint, Vector3 endPoint, RaycastHit hit)
+    {
+        GameObject meshObject = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        meshObject.transform.position = startPoint;
+        meshObject.transform.localScale = new Vector3(0.1f, 0.1f, Vector3.Distance(startPoint, endPoint));
+        meshObject.transform.LookAt(endPoint);
 
         yield return new WaitForSeconds(gunTrailShoot.duration);
-        yield return null;
-        inst.emitting = false;
-        inst.gameObject.SetActive(false);
-        renderersTrails.Release(inst);
+
+        Destroy(meshObject);
+
+        if (hit.collider != null)
+        {
+            if (hit.collider.TryGetComponent(out getDamage damageable))
+            {
+                damageable.TakeDamage(DamageConfig.GetDamage());
+            }
+        }
     }
 
     private TrailRenderer DoTrail()

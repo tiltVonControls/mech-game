@@ -9,15 +9,13 @@ public class playerAction : MonoBehaviour
     private void Update()
     {
         if (Mouse.current.leftButton.isPressed && gunSelect.gunActiveL != null)
-
         {
-            gunSelect.gunActiveL.DoShoot();
+            gunSelect.gunActiveL.DoShoot(true);
             Debug.Log("shoot left");
         }
         if (Mouse.current.rightButton.isPressed && gunSelect.gunActiveR != null)
-
         {
-            gunSelect.gunActiveR.DoShoot();
+            gunSelect.gunActiveR.DoShoot(false);
             Debug.Log("shoot right");
         }
     }

@@ -3,6 +3,8 @@ using UnityEngine;
 public enum gunType
 {
     autoCanon,
-    rotaryGun
+    rotaryGun,
+    laserCanon,
+    missileLauncher
 }
 
