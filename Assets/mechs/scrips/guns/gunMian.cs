@@ -12,6 +12,7 @@ public class gunMian : ScriptableObject
     public GameObject gunPrefab;
     public Vector3 spawn;
     public Vector3 spawnRotation;
+    public Vector3 gunEndTransform;
 
     public shootConfig config;
     public gunTrailShoot gunTrailShoot;
@@ -27,7 +28,7 @@ public class gunMian : ScriptableObject
 
     public List<gunMian> Type { get; internal set; }
 
-    public void Spawn(Transform Parent, MonoBehaviour activeMonoBehaviour)
+    public void Spawn(Transform Parent, MonoBehaviour activeMonoBehaviour, string bone)
     {
         this.activeMonoBehaviour = activeMonoBehaviour;
         lastShootTime = 0;
@@ -46,8 +47,15 @@ public class gunMian : ScriptableObject
             return;
         }
 
+        Transform boneTransform = gunObject.transform.Find(bone);
+        if (boneTransform == null)
+        {
+            Debug.LogError($"Bone '{bone}' not found in gunPrefab!");
+            return;
+        }
+
         gunObject.transform.SetParent(Parent, false);
-        gunObject.transform.localPosition = spawn;
+        gunObject.transform.localPosition = boneTransform.localPosition;
         gunObject.transform.localRotation = Quaternion.Euler(spawnRotation);
 
         gunParticleSystem = gunObject.GetComponentInChildren<ParticleSystem>();
@@ -62,19 +70,18 @@ public class gunMian : ScriptableObject
         if (Time.time > config.fireRate + lastShootTime)
         {
             lastShootTime += Time.time;
-            Transform gunEndTransform = gunObject.transform.Find("gun_shoot");
+
             if (gunEndTransform == null)
             {
                 Debug.LogError("Gun end transform not found!");
                 return;
             }
 
-            Vector3 shootDir = gunEndTransform.forward;
-            shootDir.Normalize();
+            Vector3 shootDir = gunEndTransform.normalized;
 
             GameObject newBullet = Instantiate(bullet);
-            newBullet.transform.position = gunEndTransform.position;
-            newBullet.transform.rotation = gunEndTransform.rotation;
+            newBullet.transform.position = gunEndTransform;
+            newBullet.transform.rotation = Quaternion.LookRotation(shootDir);
             newBullet.transform.localScale = new Vector3(0.1f, 0.1f, 0.5f);
             Rigidbody rb = newBullet.AddComponent<Rigidbody>();
             rb.useGravity = false;

@@ -13,6 +13,10 @@ public class gunSelect : MonoBehaviour
     private Transform gunParentL;
     [SerializeField]
     private Transform gunParentR;
+    [SerializeField] 
+    private string gunBoneL;
+    [SerializeField] 
+    private string gunBoneR;
     [SerializeField]
     private List<gunMian> guns;
 
@@ -34,7 +38,7 @@ public class gunSelect : MonoBehaviour
         gunActiveL = guns.Find(g => g.type == gunTypeL);
         if (gunActiveL != null)
         {
-            gunActiveL.Spawn(gunParentL, this);
+            gunActiveL.Spawn(gunParentL, this, gunBoneL);
             Debug.Log("Gun found: " + gunActiveL.Name);
         }
         else
@@ -45,7 +49,7 @@ public class gunSelect : MonoBehaviour
         gunActiveR = guns.Find(g => g.type == gunTypeR);
         if (gunActiveR != null)
         {
-            gunActiveR.Spawn(gunParentR, this);
+            gunActiveR.Spawn(gunParentR, this, gunBoneL);
             Debug.Log("Gun found: " + gunActiveR.Name);
         }
         else
