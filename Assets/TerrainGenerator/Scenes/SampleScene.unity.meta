@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 0897143e95bb79b41b2ae09c5903b1b5
+DefaultImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 140538
+  packageName: Terrain Generator
+  packageVersion: 1.0
+  assetPath: Assets/TerrainGenerator/Scenes/SampleScene.unity
+  uploadId: 310948
